@@ -1,13 +1,11 @@
 import { Clerk } from "@clerk/clerk-js";
 import { AuthBindings } from "@refinedev/core";
 
-import { supabaseClient } from "./utility";
 
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
 const clerk = new Clerk(clerkPubKey);
 await clerk.load({
-  // Set load options here
 });
 const authProvider: AuthBindings = {
   login: async () => {
@@ -79,12 +77,6 @@ const authProvider: AuthBindings = {
   },
 
   getPermissions: async () => {
-    const user = await supabaseClient.auth.getUser();
-
-    if (user) {
-      return user.data.user?.role;
-    }
-
     return null;
   },
   getIdentity: async () => {

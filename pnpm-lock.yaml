@@ -35,12 +35,18 @@ dependencies:
   '@refinedev/supabase':
     specifier: ^5.7.4
     version: 5.7.10(@refinedev/core@4.49.2)(@supabase/supabase-js@2.43.2)
+  '@supabase/supabase-js':
+    specifier: ^2.43.2
+    version: 2.43.2
   '@uiw/react-md-editor':
     specifier: ^3.19.5
     version: 3.25.6(@types/react@18.3.2)(react-dom@18.3.1)(react@18.3.1)
   antd:
     specifier: ^5.0.5
     version: 5.17.2(react-dom@18.3.1)(react@18.3.1)
+  dayjs:
+    specifier: ^1.11.11
+    version: 1.11.11
   react:
     specifier: ^18.0.0
     version: 18.3.1

@@ -7,7 +7,7 @@ import {
   SurveyCreatorComponent,
 } from 'survey-creator-react'
 
-const creatorOptions: ISurveyCreatorOptions = {
+const creatorOptions = {
   showLogicTab: true,
   showThemeTab: true,
   isAutoSave: true,

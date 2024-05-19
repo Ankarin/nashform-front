@@ -1,13 +1,39 @@
-import { createClient } from "@refinedev/supabase";
 
-const SUPABASE_URL = "https://redbefqurtnagpbzczqw.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJlZGJlZnF1cnRuYWdwYnpjenF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTYwNTM1MTAsImV4cCI6MjAzMTYyOTUxMH0.HKdqqRsgIcqucuPrPPP1ErHk_J2g60EEItGrNMYBMu0";
 
-export const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY, {
-  db: {
-    schema: "public",
-  },
-  auth: {
-    persistSession: true,
-  },
-});
+const SUPABASE_URL =  import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_KEY;
+import {Clerk} from "@clerk/clerk-js";
+import { createClient } from "@supabase/supabase-js";
+
+declare global {
+  interface Window {
+    // @ts-ignore
+    Clerk: Clerk | undefined;
+  }
+}
+
+function createClerkSupabaseClient() {
+  return createClient(
+      SUPABASE_URL!,
+      SUPABASE_KEY!,
+      {
+        global: {
+          fetch: async (url, options = {}) => {
+            const clerkToken = await window.Clerk.session?.getToken({
+              template: "supabase",
+            });
+            // @ts-ignore
+            const headers = new Headers(options?.headers);
+            headers.set("Authorization", `Bearer ${clerkToken}`);
+
+            return fetch(url, {
+              ...options,
+              headers,
+            });
+          },
+        },
+      }
+  );
+}
+
+export const supabaseClient = createClerkSupabaseClient();
