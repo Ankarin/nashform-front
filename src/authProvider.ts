@@ -1,179 +1,41 @@
+import { Clerk } from "@clerk/clerk-js";
 import { AuthBindings } from "@refinedev/core";
 
 import { supabaseClient } from "./utility";
 
+const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+
+const clerk = new Clerk(clerkPubKey);
+await clerk.load({
+  // Set load options here
+});
 const authProvider: AuthBindings = {
-  login: async ({ email, password, providerName }) => {
-    // sign in with oauth
-    try {
-      if (providerName) {
-        const { data, error } = await supabaseClient.auth.signInWithOAuth({
-          provider: providerName,
-        });
-
-        if (error) {
-          return {
-            success: false,
-            error,
-          };
-        }
-
-        if (data?.url) {
-          return {
-            success: true,
-            redirectTo: "/",
-          };
-        }
-      }
-
-      // sign in with email and password
-      const { data, error } = await supabaseClient.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) {
-        return {
-          success: false,
-          error,
-        };
-      }
-
-      if (data?.user) {
-        return {
-          success: true,
-          redirectTo: "/",
-        };
-      }
-    } catch (error: any) {
-      return {
-        success: false,
-        error,
-      };
-    }
-
+  login: async () => {
     return {
-      success: false,
-      error: {
-        message: "Login failed",
-        name: "Invalid email or password",
-      },
+      success: true,
+      redirectTo: "/",
     };
   },
-  register: async ({ email, password }) => {
-    try {
-      const { data, error } = await supabaseClient.auth.signUp({
-        email,
-        password,
-      });
-
-      if (error) {
-        return {
-          success: false,
-          error,
-        };
-      }
-
-      if (data) {
-        return {
-          success: true,
-          redirectTo: "/",
-        };
-      }
-    } catch (error: any) {
-      return {
-        success: false,
-        error,
-      };
-    }
-
+  register: async () => {
     return {
-      success: false,
-      error: {
-        message: "Register failed",
-        name: "Invalid email or password",
-      },
+      success: true,
+      redirectTo: "/login",
     };
   },
-  forgotPassword: async ({ email }) => {
-    try {
-      const { data, error } = await supabaseClient.auth.resetPasswordForEmail(
-        email,
-        {
-          redirectTo: `${window.location.origin}/update-password`,
-        }
-      );
-
-      if (error) {
-        return {
-          success: false,
-          error,
-        };
-      }
-
-      if (data) {
-        return {
-          success: true,
-        };
-      }
-    } catch (error: any) {
-      return {
-        success: false,
-        error,
-      };
-    }
-
+  forgotPassword: async () => {
     return {
-      success: false,
-      error: {
-        message: "Forgot password failed",
-        name: "Invalid email",
-      },
+      success: true,
+      redirectTo: "/login",
     };
   },
   updatePassword: async ({ password }) => {
-    try {
-      const { data, error } = await supabaseClient.auth.updateUser({
-        password,
-      });
-
-      if (error) {
-        return {
-          success: false,
-          error,
-        };
-      }
-
-      if (data) {
-        return {
-          success: true,
-          redirectTo: "/",
-        };
-      }
-    } catch (error: any) {
-      return {
-        success: false,
-        error,
-      };
-    }
     return {
-      success: false,
-      error: {
-        message: "Update password failed",
-        name: "Invalid password",
-      },
+      success: true,
+      redirectTo: "/",
     };
   },
   logout: async () => {
-    const { error } = await supabaseClient.auth.signOut();
-
-    if (error) {
-      return {
-        success: false,
-        error,
-      };
-    }
-
+    await clerk.signOut();
     return {
       success: true,
       redirectTo: "/",
@@ -185,9 +47,9 @@ const authProvider: AuthBindings = {
   },
   check: async () => {
     try {
-      const { data } = await supabaseClient.auth.getSession();
-      const { session } = data;
-
+      clerk.load();
+      const session = clerk.session;
+      console.log(session);
       if (!session) {
         return {
           authenticated: false,
@@ -215,6 +77,7 @@ const authProvider: AuthBindings = {
       authenticated: true,
     };
   },
+
   getPermissions: async () => {
     const user = await supabaseClient.auth.getUser();
 
@@ -225,12 +88,11 @@ const authProvider: AuthBindings = {
     return null;
   },
   getIdentity: async () => {
-    const { data } = await supabaseClient.auth.getUser();
-
-    if (data?.user) {
+    const session = clerk.session;
+    console.log(session);
+    if (session) {
       return {
-        ...data.user,
-        name: data.user.email,
+        name: session.user.firstName,
       };
     }
 
