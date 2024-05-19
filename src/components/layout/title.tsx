@@ -74,7 +74,7 @@ export const Title: React.FC<RefineLayoutThemedTitleProps> = ({
               fontWeight: 700,
             }}
           >
-            Supaforms
+            Nashform
           </Typography.Title>
         )}
       </Space>
